@@ -634,6 +634,10 @@ function wfExpandUrl( $url, $defaultProto = PROTO_CURRENT ) {
 
 	if ( $bits && isset( $bits['path'] ) ) {
 		$bits['path'] = wfRemoveDotSegments( $bits['path'] );
+        if ( $defaultProto === PROTO_RELATIVE ) {
+            $bits['scheme'] = '';
+            $bits['delimiter'] = '//';
+        }
 		return wfAssembleUrl( $bits );
 	} elseif ( $bits ) {
 		# No path to expand
