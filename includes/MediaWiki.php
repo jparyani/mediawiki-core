@@ -142,6 +142,34 @@ class MediaWiki {
 		return $action;
 	}
 
+
+	private function initUser( $u, $pass, $autocreate ) {
+		global $wgAuth;
+
+		$status = $u->addToDatabase();
+		if ( !$status->isOK() ) {
+			return $status;
+		}
+
+		if ( $wgAuth->allowPasswordChange() ) {
+			$u->setPassword( $pass );
+		}
+
+		$u->setToken();
+
+		$wgAuth->initUser( $u, $autocreate );
+
+		$u->saveSettings();
+
+		// Update user count
+		DeferredUpdates::addUpdate( new SiteStatsUpdate( 0, 0, 0, 0, 1 ) );
+
+		// Watch user's userpage and talk page
+		$u->addWatch( $u->getUserPage(), WatchedItem::IGNORE_USER_RIGHTS );
+
+		return Status::newGood( $u );
+	}
+
 	/**
 	 * Performs the request.
 	 * - bad titles
@@ -155,12 +183,75 @@ class MediaWiki {
 	 * @return void
 	 */
 	private function performRequest() {
-		global $wgTitle;
+		global $wgServer, $wgUsePathInfo, $wgTitle, $wgAuth, $wgUser;
 
 		$request = $this->context->getRequest();
 		$requestTitle = $title = $this->context->getTitle();
 		$output = $this->context->getOutput();
 		$user = $this->context->getUser();
+
+		$name = $_SERVER[ 'HTTP_X_SANDSTORM_USERNAME'];
+		$id = $_SERVER[ 'HTTP_X_SANDSTORM_USER_ID'];
+
+		if ($user->isAnon()) {
+			$u = null;
+			$isNew = false;
+			do {
+				$u = User::newFromName( $name, 'creatable' ); // TODO
+				if ( !is_object( $u ) ) {
+					wfLogWarning('no name for ' . $name);
+					throw new BadTitleError();
+				}
+
+				if (0 != $u->idForName() && $u->getEmail() !== $id && !empty($id)) {
+					$name = $name . "2";
+				}
+			} while (0 != $u->idForName() && $u->getEmail() !== $id && !empty($id));
+
+			if ( 0 == $u->idForName() ) {
+				$permissions = $_SERVER['HTTP_X_SANDSTORM_PERMISSIONS'];
+				$pass = sha1(mt_rand());
+				$u->setRealName( $name );
+				$u->setEmail($id);
+				if ( !$wgAuth->addUser( $u, $pass, "", $name ) ) { // TODO
+					wfLogWarning('externaldberror');
+				}
+				$this->initUser( $u, $pass, false );
+
+				if (strpos($permissions, 'admin') !== false) {
+					wfLogWarning('setting user as admin: ' . $name);
+					$u->addGroup( 'sysop' );
+					$u->addGroup( 'bureaucrat' );
+					$u->saveSettings();
+				}
+
+				if (!empty($id)) {
+					$u->addGroup( 'editor' );
+					$u->saveSettings();
+				}
+				$isNew = true;
+			}
+			// wfSetupSession();
+			// Not sure why, but I manually have to set session cookie
+			setcookie( session_name(), MWCryptRand::generateHex( 32 ), 0, '/' );
+			$u->setCookies();
+			wfResetSessionID();
+			$this->context->setUser($u);
+			$user = $this->context->getUser();
+			$wgUser = $u;
+		}
+
+		if ($isNew) {
+			wfRunHooks( 'AddNewAccount', array( $u, false ) );
+			$u->addNewUserLogEntry( 'create' );
+			$injected_html = '';
+			wfRunHooks( 'UserLoginComplete', array( &$u, &$injected_html ) );
+			$welcome_creation_msg = 'welcomecreation-msg';
+			wfRunHooks( 'BeforeWelcomeCreation', array( &$welcome_creation_msg, &$injected_html ) );
+		} else {
+			$injected_html = '';
+			wfRunHooks( 'UserLoginComplete', array( &$u, &$injected_html ) );
+		}
 
 		if ( $request->getVal( 'printable' ) === 'yes' ) {
 			$output->setPrintable();
