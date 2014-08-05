@@ -190,8 +190,8 @@ class MediaWiki {
 		$output = $this->context->getOutput();
 		$user = $this->context->getUser();
 
-		$name = $_SERVER[ 'HTTP_X_SANDSTORM_USERNAME'];
-		$id = $_SERVER[ 'HTTP_X_SANDSTORM_USER_ID'];
+		$name = array_key_exists('HTTP_X_SANDSTORM_USERNAME', $_SERVER) ? $_SERVER[ 'HTTP_X_SANDSTORM_USERNAME'] : 'Public';
+		$id = array_key_exists('HTTP_X_SANDSTORM_USER_ID', $_SERVER) ? $_SERVER[ 'HTTP_X_SANDSTORM_USER_ID'] : '';
 
 		if ($user->isAnon()) {
 			$u = null;
