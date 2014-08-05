@@ -624,15 +624,15 @@ class SkinTemplate extends Skin {
 				'href' => $href,
 				'active' => $active
 			);
-			$personal_urls['logout'] = array(
-				'text' => $this->msg( 'pt-userlogout' )->text(),
-				'href' => self::makeSpecialUrl( 'Userlogout',
-					// userlogout link must always contain an & character, otherwise we might not be able
-					// to detect a buggy precaching proxy (bug 17790)
-					$title->isSpecial( 'Preferences' ) ? 'noreturnto' : $returnto
-				),
-				'active' => false
-			);
+			// $personal_urls['logout'] = array(
+			// 	'text' => $this->msg( 'pt-userlogout' )->text(),
+			// 	'href' => self::makeSpecialUrl( 'Userlogout',
+			// 		// userlogout link must always contain an & character, otherwise we might not be able
+			// 		// to detect a buggy precaching proxy (bug 17790)
+			// 		$title->isSpecial( 'Preferences' ) ? 'noreturnto' : $returnto
+			// 	),
+			// 	'active' => false
+			// );
 		} else {
 			$useCombinedLoginLink = $this->useCombinedLoginLink();
 			$loginlink = $this->getUser()->isAllowed( 'createaccount' ) && $useCombinedLoginLink
@@ -640,17 +640,17 @@ class SkinTemplate extends Skin {
 				: 'pt-login';
 			$is_signup = $request->getText( 'type' ) == 'signup';
 
-			$login_url = array(
-				'text' => $this->msg( $loginlink )->text(),
-				'href' => self::makeSpecialUrl( 'Userlogin', $returnto ),
-				'active' => $title->isSpecial( 'Userlogin' )
-					&& ( $loginlink == 'nav-login-createaccount' || !$is_signup ),
-			);
-			$createaccount_url = array(
-				'text' => $this->msg( 'pt-createaccount' )->text(),
-				'href' => self::makeSpecialUrl( 'Userlogin', "$returnto&type=signup" ),
-				'active' => $title->isSpecial( 'Userlogin' ) && $is_signup,
-			);
+			// $login_url = array(
+			// 	'text' => $this->msg( $loginlink )->text(),
+			// 	'href' => self::makeSpecialUrl( 'Userlogin', $returnto ),
+			// 	'active' => $title->isSpecial( 'Userlogin' )
+			// 		&& ( $loginlink == 'nav-login-createaccount' || !$is_signup ),
+			// );
+			// $createaccount_url = array(
+			// 	'text' => $this->msg( 'pt-createaccount' )->text(),
+			// 	'href' => self::makeSpecialUrl( 'Userlogin', "$returnto&type=signup" ),
+			// 	'active' => $title->isSpecial( 'Userlogin' ) && $is_signup,
+			// );
 
 			if ( $this->showIPinHeader() ) {
 				$href = &$this->userpageUrlDetails['href'];
@@ -670,11 +670,11 @@ class SkinTemplate extends Skin {
 				);
 			}
 
-			if ( $this->getUser()->isAllowed( 'createaccount' ) && !$useCombinedLoginLink ) {
-				$personal_urls['createaccount'] = $createaccount_url;
-			}
+			// if ( $this->getUser()->isAllowed( 'createaccount' ) && !$useCombinedLoginLink ) {
+			// 	$personal_urls['createaccount'] = $createaccount_url;
+			// }
 
-			$personal_urls['login'] = $login_url;
+			// $personal_urls['login'] = $login_url;
 		}
 
 		Hooks::run( 'PersonalUrls', array( &$personal_urls, &$title, $this ) );
