@@ -191,7 +191,9 @@ class MediaWiki {
 		$user = $this->context->getUser();
 
 		$name = array_key_exists('HTTP_X_SANDSTORM_USERNAME', $_SERVER) ? $_SERVER[ 'HTTP_X_SANDSTORM_USERNAME'] : 'Public';
+		$original_name = $name;
 		$id = array_key_exists('HTTP_X_SANDSTORM_USER_ID', $_SERVER) ? $_SERVER[ 'HTTP_X_SANDSTORM_USER_ID'] : '';
+		$count = 2;
 
 		if ($user->isAnon()) {
 			$u = null;
@@ -204,8 +206,9 @@ class MediaWiki {
 				}
 
 				if (0 != $u->idForName() && $u->getEmail() !== $id && !empty($id)) {
-					$name = $name . "2";
+					$name = $original_name . $count;
 				}
+				$count++;
 			} while (0 != $u->idForName() && $u->getEmail() !== $id && !empty($id));
 
 			if ( 0 == $u->idForName() ) {
