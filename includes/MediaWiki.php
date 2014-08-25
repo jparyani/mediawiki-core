@@ -195,9 +195,9 @@ class MediaWiki {
 		$id = array_key_exists('HTTP_X_SANDSTORM_USER_ID', $_SERVER) ? $_SERVER[ 'HTTP_X_SANDSTORM_USER_ID'] : '';
 		$count = 2;
 
+		$isNew = false;
 		if ($user->isAnon()) {
 			$u = null;
-			$isNew = false;
 			do {
 				$u = User::newFromName( $name, 'creatable' ); // TODO
 				if ( !is_object( $u ) ) {
@@ -212,7 +212,7 @@ class MediaWiki {
 			} while (0 != $u->idForName() && $u->getEmail() !== $id && !empty($id));
 
 			if ( 0 == $u->idForName() ) {
-				$permissions = $_SERVER['HTTP_X_SANDSTORM_PERMISSIONS'];
+				$permissions = array_key_exists('HTTP_X_SANDSTORM_PERMISSIONS', $_SERVER) ? $_SERVER[ 'HTTP_X_SANDSTORM_PERMISSIONS'] : '';
 				$pass = sha1(mt_rand());
 				$u->setRealName( $name );
 				$u->setEmail($id);
