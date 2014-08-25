@@ -11,6 +11,10 @@
 	$( function () {
 		mw.util.init();
 
+		var locationStr = location.toString();
+		if (locationStr.indexOf('?') === -1) {
+			window.parent.postMessage({'setPath': location.pathname.replace('/index.php', '')}, '*')
+		}
 		/**
 		 * Fired when wiki content is being added to the DOM
 		 *
