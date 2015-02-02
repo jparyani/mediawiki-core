@@ -191,6 +191,7 @@ class MediaWiki {
 		$user = $this->context->getUser();
 
 		$name = array_key_exists('HTTP_X_SANDSTORM_USERNAME', $_SERVER) ? $_SERVER[ 'HTTP_X_SANDSTORM_USERNAME'] : 'Public';
+		$name = urldecode($name);
 		$original_name = $name;
 		$id = array_key_exists('HTTP_X_SANDSTORM_USER_ID', $_SERVER) ? $_SERVER[ 'HTTP_X_SANDSTORM_USER_ID'] : '';
 		$count = 2;
