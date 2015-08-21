@@ -234,6 +234,25 @@ class MediaWiki {
 					$u->saveSettings();
 				}
 				$isNew = true;
+			} else {
+				// Check that current user's groups are correct
+				$permissions = array_key_exists('HTTP_X_SANDSTORM_PERMISSIONS', $_SERVER) ? $_SERVER[ 'HTTP_X_SANDSTORM_PERMISSIONS'] : '';
+				$groups = $u->getGroups();
+				if (in_array("sysop", $groups)) {
+					if (strpos($permissions, 'admin') === false) {
+						wfLogWarning('removing user as admin: ' . $name);
+						$u->removeGroup( 'sysop' );
+						$u->removeGroup( 'bureaucrat' );
+						$u->saveSettings();
+					}
+				} else {
+					if (strpos($permissions, 'admin') !== false) {
+						wfLogWarning('setting user as admin: ' . $name);
+						$u->addGroup( 'sysop' );
+						$u->addGroup( 'bureaucrat' );
+						$u->saveSettings();
+					}
+				}
 			}
 			// wfSetupSession();
 			// Not sure why, but I manually have to set session cookie
